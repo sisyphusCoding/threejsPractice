@@ -3,6 +3,7 @@ import './style.css'
 
 import * as THREE from 'three'
 import{OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
+import { Mesh } from 'three'
 const canvas = document.querySelector('#canvas')
 
 
@@ -57,8 +58,12 @@ window.addEventListener('mousemove',(event)=>{
 })
 
 const scene = new THREE.Scene()
+
+const geometry = new THREE.BoxGeometry(2,.2,2)
+
+
 const cube = new THREE.Mesh(
-new THREE.BoxGeometry(2,.2,2,5,5,1),
+geometry,  
 new THREE.MeshBasicMaterial({color:0x001616})
 )
 
@@ -67,12 +72,18 @@ cube.castShadow = true
 
 scene.add(cube)
 
+
+const directionalLight = new THREE.DirectionalLight(0x00fffc, .2)
+scene.add(directionalLight)
+directionalLight.lookAt(Mesh)
+directionalLight.position.set(Mesh)
 const camera = new THREE.PerspectiveCamera(75,sizes.w/sizes.h,.1,100)
 camera.position.y=2
 camera.position.x=2
 camera.position.z=2.5
 camera.lookAt(cube.position)
 scene.add(camera)
+
 
 const controls = new OrbitControls(camera,canvas)
 controls.enableDamping = true
@@ -84,9 +95,9 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.w,sizes.h)
 renderer.shadowMap.enabled = true
 
-renderer.setClearColor(0xc0c0c0,0)
-renderer.setPixelRatio(pixelRatio)
 
+renderer.setPixelRatio(pixelRatio)
+renderer.setClearColor(0x191919,0.1)
 const clock = new THREE.Clock()
 
 const tick = ( ) => {
