@@ -1,19 +1,34 @@
 import './style.css'
 
-
+import{Pane} from 'tweakpane'
 import * as THREE from 'three'
+import gsap from 'gsap'
 import{OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import { Mesh } from 'three'
 const canvas = document.querySelector('#canvas')
 
 
 
+const pane = new Pane({expanded:true})
+
+
+const param = {
+  color: 0x191919,
+  spin: ()=>{
+  console.log('spinning')
+
+
+   gsap.from(cube.rotation,{y:cube.position.y + Math.PI *0}) 
+   gsap.to(cube.rotation,{duration:1,y:cube.position.y + Math.PI *2,ease:'power3.out'}) 
+
+  }
+}
+
 const pixelRatio = Math.min(window.devicePixelRatio , 2)
 const sizes = {
   w:window.innerWidth,
   h:window.innerHeight,
 }
-
 
 window.addEventListener('dblclick',()=>{
   
@@ -60,11 +75,10 @@ window.addEventListener('mousemove',(event)=>{
 const scene = new THREE.Scene()
 
 const geometry = new THREE.BoxGeometry(2,.2,2)
-
+const material = new THREE.MeshBasicMaterial({color:param.color})
 
 const cube = new THREE.Mesh(
-geometry,  
-new THREE.MeshBasicMaterial({color:0x001616})
+geometry, material
 )
 
 cube.receiveShadow = true
@@ -72,11 +86,6 @@ cube.castShadow = true
 
 scene.add(cube)
 
-
-const directionalLight = new THREE.DirectionalLight(0x00fffc, .2)
-scene.add(directionalLight)
-directionalLight.lookAt(Mesh)
-directionalLight.position.set(Mesh)
 const camera = new THREE.PerspectiveCamera(75,sizes.w/sizes.h,.1,100)
 camera.position.y=2
 camera.position.x=2
@@ -111,4 +120,47 @@ const tick = ( ) => {
 }
 
 tick()
+
+const p = pane.addFolder({
+  title:'Position', expanded:false
+})
+
+let step = 1/50
+
+
+p.addInput(cube.position,'x',{min:-5,max:5,step:step})
+p.addInput(cube.position,'y',{min:-5,max:5,step:step})
+p.addInput(cube.position,'z',{min:-5,max:5,step:step})
+
+const r = pane.addFolder({
+  title:'Rotation', expanded:false
+})
+
+
+
+r.addInput(cube.rotation,'x',{min:-5,max:5,step:step})
+r.addInput(cube.rotation,'y',{min:-5,max:5,step:step})
+r.addInput(cube.rotation,'z',{min:-5,max:5,step:step})
+
+
+
+pane.addInput(material,'wireframe')
+const handleColor =   pane.addInput(param,'color',{view:'color'})
+
+handleColor.on('change',(e)=>{
+material.color.set(e.value)
+})
+
+const handleSpin=  pane.addButton({
+  label:'Animate',title:'Spin'
+})
+
+handleSpin.on('click',()=>{
+
+   param.spin()
+})
+
+
+
+
 
