@@ -5,12 +5,32 @@ import * as THREE from 'three'
 import gsap from 'gsap'
 import{OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import { Mesh } from 'three'
+import { normalize } from 'gsap/gsap-core'
 const canvas = document.querySelector('#canvas')
+
 
 
 
 const pane = new Pane({expanded:true})
 
+const loadingManager  = new THREE.LoadingManager()
+
+loadingManager.onStart = () =>{console.log('start')}
+loadingManager.onProgress=()=>{console.log('progress')}
+loadingManager.onLoad =()=>{console.log('loaded')}
+loadingManager.onError = () => {console.log('error')}
+
+const textureLoader = new THREE.TextureLoader(loadingManager)
+
+
+const coltexture = textureLoader.load('/static/textures/minecraft.png')
+const alphatexture = textureLoader.load('/static/textures/door/alpha.jpg')
+const noramaltexture = textureLoader.load('/static/textures/door/normal.jpg')
+const ambienttexture = textureLoader.load('/static/textures/door/ambient.jpg')
+
+coltexture.generateMipmaps = false
+coltexture.minFilter = THREE.NearestFilter
+coltexture.magFilter = THREE.NearestFilter
 
 const param = {
   color: 0x191919,
@@ -75,7 +95,7 @@ window.addEventListener('mousemove',(event)=>{
 const scene = new THREE.Scene()
 
 const geometry = new THREE.BoxGeometry(2,.2,2)
-const material = new THREE.MeshBasicMaterial({color:param.color})
+const material = new THREE.MeshBasicMaterial({map:coltexture})
 
 const cube = new THREE.Mesh(
 geometry, material
