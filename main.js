@@ -4,43 +4,58 @@ import{Pane} from 'tweakpane'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import{OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
-import { Mesh } from 'three'
-import { normalize } from 'gsap/gsap-core'
+import { CubeTextureLoader } from 'three'
 const canvas = document.querySelector('#canvas')
+
+
+const textureLoader = new THREE.TextureLoader()
+
+
+const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+const normalTexture = textureLoader.load('/textures/door/normal.jpg')
+const ambientTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+const colorTexture = textureLoader.load('/textures/door/color.jpg')
+const heightTexture = textureLoader.load('/textures/door/height.jpg')
+const metalTexture = textureLoader.load('/textures/door/metalness.jpg')
+const roughTexture = textureLoader.load('/textures/door/roughness.jpg')
+
+const gradientTexture01 = textureLoader.load('/textures/gradients/5.jpg')
+const matTexture01 = textureLoader.load('/textures/matcaps/8.png')
+
+gradientTexture01.minFilter = THREE.NearestFilter
+gradientTexture01.magFilter = THREE.NearestFilter
+gradientTexture01.generateMipmaps = false
+
+
+
+const cubeLoader = new THREE.CubeTextureLoader()
+
+const environmentMapTexture = cubeLoader.load([
+  '/textures/environmentMaps/0/px.jpg',
+  '/textures/environmentMaps/0/nx.jpg',
+  '/textures/environmentMaps/0/py.jpg',
+  '/textures/environmentMaps/0/ny.jpg',
+  '/textures/environmentMaps/0/pz.jpg',
+  '/textures/environmentMaps/0/nz.jpg'
+])
 
 
 
 
 const pane = new Pane({expanded:true})
 
-const loadingManager  = new THREE.LoadingManager()
-
-loadingManager.onStart = () =>{console.log('start')}
-loadingManager.onProgress=()=>{console.log('progress')}
-loadingManager.onLoad =()=>{console.log('loaded')}
-loadingManager.onError = () => {console.log('error')}
-
-const textureLoader = new THREE.TextureLoader(loadingManager)
-
-
-const coltexture = textureLoader.load('/static/textures/minecraft.png')
-const alphatexture = textureLoader.load('/static/textures/door/alpha.jpg')
-const noramaltexture = textureLoader.load('/static/textures/door/normal.jpg')
-const ambienttexture = textureLoader.load('/static/textures/door/ambient.jpg')
-
-coltexture.generateMipmaps = false
-coltexture.minFilter = THREE.NearestFilter
-coltexture.magFilter = THREE.NearestFilter
-
 const param = {
   color: 0x191919,
   spin: ()=>{
   console.log('spinning')
 
+   gsap.from(sphere.rotation,{y:cube.position.y + Math.PI *0}) 
+   gsap.to(sphere.rotation,{duration:1,y:cube.position.y + Math.PI *2,ease:'power3.out'}) 
+   gsap.from(plane.rotation,{y:cube.position.y + Math.PI *0}) 
+   gsap.to(plane.rotation,{duration:1,y:cube.position.y + Math.PI *2,ease:'power3.out'}) 
 
-   gsap.from(cube.rotation,{y:cube.position.y + Math.PI *0}) 
-   gsap.to(cube.rotation,{duration:1,y:cube.position.y + Math.PI *2,ease:'power3.out'}) 
-
+   gsap.from(torus.rotation,{y:cube.position.y + Math.PI *0}) 
+   gsap.to(torus.rotation,{duration:1,y:cube.position.y + Math.PI *2,ease:'power3.out'}) 
   }
 }
 
@@ -95,22 +110,70 @@ window.addEventListener('mousemove',(event)=>{
 const scene = new THREE.Scene()
 
 const geometry = new THREE.BoxGeometry(2,.2,2)
-const material = new THREE.MeshBasicMaterial({map:coltexture})
 
-const cube = new THREE.Mesh(
-geometry, material
+const material = new THREE.MeshStandardMaterial()
+
+material.metalness = 0.7
+material.roughness = 0.2
+material.map =colorTexture
+material.aoMap = ambientTexture
+material.aoMapIntensity = 1
+material.displacementMap = heightTexture
+material.displacementScale = 0.05
+material.metalnessMap = metalTexture
+material.roughnessMap = roughTexture
+material.normalMap = normalTexture
+material.transparent = true
+material.alphaMap = alphaTexture
+
+const sphere =  new THREE.Mesh(
+  new THREE.SphereGeometry(0.5,64,64),
+  material
 )
 
-cube.receiveShadow = true
-cube.castShadow = true
+sphere.geometry.setAttribute(
+'uv2', 
+ new THREE.BufferAttribute(sphere.geometry.attributes.uv.array,2))
 
-scene.add(cube)
+const plane = new THREE.Mesh(
+  new THREE.PlaneGeometry(1,1,100,100),
+  material
+)
+
+plane.geometry.setAttribute(
+'uv2', 
+ new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2))
+
+
+
+
+const torus = new THREE.Mesh(
+  new THREE.TorusGeometry(0.3,0.2,64,128),
+  material
+)
+torus.geometry.setAttribute(
+'uv2', 
+ new THREE.BufferAttribute(torus.geometry.attributes.uv.array,2))
+
+torus.position.x = 1.5
+
+sphere.position.x = -1.5
+scene.add(sphere,plane,torus)
+
+const ambientLight = new THREE.AmbientLight(0xffffff,0.5)
+scene.add(ambientLight)
+
+const pointLight = new THREE.PointLight(0xffffff,0.5)
+pointLight.position.x=2 
+pointLight.position.y=3 
+pointLight.position.z = 4
+
+scene.add(pointLight)
 
 const camera = new THREE.PerspectiveCamera(75,sizes.w/sizes.h,.1,100)
 camera.position.y=2
 camera.position.x=2
 camera.position.z=2.5
-camera.lookAt(cube.position)
 scene.add(camera)
 
 
@@ -127,6 +190,8 @@ renderer.shadowMap.enabled = true
 
 renderer.setPixelRatio(pixelRatio)
 renderer.setClearColor(0x191919,0.1)
+
+
 const clock = new THREE.Clock()
 
 const tick = ( ) => {
@@ -141,28 +206,18 @@ const tick = ( ) => {
 
 tick()
 
-const p = pane.addFolder({
-  title:'Position', expanded:false
-})
 
-let step = 1/50
+let steps=  1/100
 
+pane.addInput(material,'metalness',{min:0,max:1,steps:steps})
+pane.addInput(material,'roughness',{min:0,max:1,steps:steps})
+pane.addInput(material,'aoMapIntensity',{min:0,max:10,steps:steps,label:'Ambient Light Occlusion'})
 
-p.addInput(cube.position,'x',{min:-5,max:5,step:step})
-p.addInput(cube.position,'y',{min:-5,max:5,step:step})
-p.addInput(cube.position,'z',{min:-5,max:5,step:step})
-
-const r = pane.addFolder({
-  title:'Rotation', expanded:false
-})
-
-
-
-r.addInput(cube.rotation,'x',{min:-5,max:5,step:step})
-r.addInput(cube.rotation,'y',{min:-5,max:5,step:step})
-r.addInput(cube.rotation,'z',{min:-5,max:5,step:step})
-
-
+pane.addInput(
+material,
+'displacementScale',
+{min:0,max:1,steps:steps/10,label:'Displacement Scale'}
+)
 
 pane.addInput(material,'wireframe')
 const handleColor =   pane.addInput(param,'color',{view:'color'})
