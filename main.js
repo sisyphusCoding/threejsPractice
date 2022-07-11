@@ -11,16 +11,16 @@ const canvas = document.querySelector('#canvas')
 const textureLoader = new THREE.TextureLoader()
 
 
-const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
-const normalTexture = textureLoader.load('/textures/door/normal.jpg')
-const ambientTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
-const colorTexture = textureLoader.load('/textures/door/color.jpg')
-const heightTexture = textureLoader.load('/textures/door/height.jpg')
-const metalTexture = textureLoader.load('/textures/door/metalness.jpg')
-const roughTexture = textureLoader.load('/textures/door/roughness.jpg')
+const alphaTexture = textureLoader.load('./textures/door/alpha.jpg')
+const normalTexture = textureLoader.load('./textures/door/normal.jpg')
+const ambientTexture = textureLoader.load('./textures/door/ambientOcclusion.jpg')
+const colorTexture = textureLoader.load('./textures/door/color.jpg')
+const heightTexture = textureLoader.load('./textures/door/height.jpg')
+const metalTexture = textureLoader.load('./textures/door/metalness.jpg')
+const roughTexture = textureLoader.load('./textures/door/roughness.jpg')
 
-const gradientTexture01 = textureLoader.load('/textures/gradients/5.jpg')
-const matTexture01 = textureLoader.load('/textures/matcaps/8.png')
+const gradientTexture01 = textureLoader.load('./textures/gradients/5.jpg')
+const matTexture01 = textureLoader.load('./textures/matcaps/8.png')
 
 gradientTexture01.minFilter = THREE.NearestFilter
 gradientTexture01.magFilter = THREE.NearestFilter
