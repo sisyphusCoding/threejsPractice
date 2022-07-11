@@ -3,42 +3,77 @@ import './style.css'
 import{Pane} from 'tweakpane'
 import * as THREE from 'three'
 import gsap from 'gsap'
+import{FontLoader} from 'three/examples/jsm/loaders/FontLoader.js'
+import{TextGeometry} from 'three/examples/jsm/geometries/TextGeometry.js'
 import{OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
-import { CubeTextureLoader } from 'three'
-const canvas = document.querySelector('#canvas')
+import { TextureLoader } from 'three'
 
+const canvas = document.querySelector('#canvas')
 
 const textureLoader = new THREE.TextureLoader()
 
-
-const alphaTexture = textureLoader.load('./textures/door/alpha.jpg')
-const normalTexture = textureLoader.load('./textures/door/normal.jpg')
-const ambientTexture = textureLoader.load('./textures/door/ambientOcclusion.jpg')
-const colorTexture = textureLoader.load('./textures/door/color.jpg')
-const heightTexture = textureLoader.load('./textures/door/height.jpg')
-const metalTexture = textureLoader.load('./textures/door/metalness.jpg')
-const roughTexture = textureLoader.load('./textures/door/roughness.jpg')
-
-const gradientTexture01 = textureLoader.load('./textures/gradients/5.jpg')
-const matTexture01 = textureLoader.load('./textures/matcaps/8.png')
-
-gradientTexture01.minFilter = THREE.NearestFilter
-gradientTexture01.magFilter = THREE.NearestFilter
-gradientTexture01.generateMipmaps = false
+const matCap01 = textureLoader.load('/textures/matcaps/8.png') 
 
 
 
-const cubeLoader = new THREE.CubeTextureLoader()
+const scene = new THREE.Scene()
+const fontLoader =  new FontLoader()
+fontLoader.load(
+  '/fonts/helvetiker_regular.typeface.json',
+  (font)=>{
+    const textGeometry = new TextGeometry(
+      'Hello Three.JS',
+      {
+        font:font,
+        size:0.5,
+        height:0.2,
+        curveSegments:6,
+        bevelEnabled:true,
+        bevelThickness:0.03,
+        bevelSize:0.02,
+        bevelOffset:0,
+        bevelSegments:4
+      }
+    )
+          
+    textGeometry.center()
 
-const environmentMapTexture = cubeLoader.load([
-  '/textures/environmentMaps/0/px.jpg',
-  '/textures/environmentMaps/0/nx.jpg',
-  '/textures/environmentMaps/0/py.jpg',
-  '/textures/environmentMaps/0/ny.jpg',
-  '/textures/environmentMaps/0/pz.jpg',
-  '/textures/environmentMaps/0/nz.jpg'
-])
+    const material  = new THREE.MeshMatcapMaterial()
+    material.matcap = matCap01
 
+
+handleColor.on('change',(e)=>{
+textMaterial.color.set(e.value)
+})
+    const text = new THREE.Mesh(textGeometry,material)
+    scene.add(text)
+
+    console.time('donut')
+
+
+      const donutGeometry = new THREE.TorusGeometry(0.3,0.2,20,45)
+    for(let i = 0 ; i <150;i++){
+
+      const donut = new THREE.Mesh(donutGeometry,material)
+
+      donut.position.x  = (Math.random() - 0.5) * 10
+      donut.position.y  = (Math.random() - 0.5) * 10
+      donut.position.z  = (Math.random() - 0.5) * 10
+
+      donut.rotation.x = Math.random() * Math.PI
+
+      donut.rotation.y = Math.random() * Math.PI
+
+      const thisScale = Math.random()
+
+      donut.scale.set(thisScale,thisScale,thisScale)
+
+      scene.add(donut)
+    }
+
+    console.timeEnd('donut')
+  }
+)
 
 
 
@@ -107,66 +142,14 @@ window.addEventListener('mousemove',(event)=>{
     cursor.y= -( (event.clientY / sizes.h) - 0.5)    
 })
 
-const scene = new THREE.Scene()
-
-const geometry = new THREE.BoxGeometry(2,.2,2)
-
-const material = new THREE.MeshStandardMaterial()
-
-material.metalness = 0.7
-material.roughness = 0.2
-material.map =colorTexture
-material.aoMap = ambientTexture
-material.aoMapIntensity = 1
-material.displacementMap = heightTexture
-material.displacementScale = 0.05
-material.metalnessMap = metalTexture
-material.roughnessMap = roughTexture
-material.normalMap = normalTexture
-material.transparent = true
-material.alphaMap = alphaTexture
-
-const sphere =  new THREE.Mesh(
-  new THREE.SphereGeometry(0.5,64,64),
-  material
-)
-
-sphere.geometry.setAttribute(
-'uv2', 
- new THREE.BufferAttribute(sphere.geometry.attributes.uv.array,2))
-
-const plane = new THREE.Mesh(
-  new THREE.PlaneGeometry(1,1,100,100),
-  material
-)
-
-plane.geometry.setAttribute(
-'uv2', 
- new THREE.BufferAttribute(plane.geometry.attributes.uv.array,2))
-
-
-
-
-const torus = new THREE.Mesh(
-  new THREE.TorusGeometry(0.3,0.2,64,128),
-  material
-)
-torus.geometry.setAttribute(
-'uv2', 
- new THREE.BufferAttribute(torus.geometry.attributes.uv.array,2))
-
-torus.position.x = 1.5
-
-sphere.position.x = -1.5
-scene.add(sphere,plane,torus)
 
 const ambientLight = new THREE.AmbientLight(0xffffff,0.5)
 scene.add(ambientLight)
 
 const pointLight = new THREE.PointLight(0xffffff,0.5)
-pointLight.position.x=2 
-pointLight.position.y=3 
-pointLight.position.z = 4
+pointLight.position.x=2
+pointLight.position.y=2
+pointLight.position.z = 5
 
 scene.add(pointLight)
 
@@ -209,22 +192,8 @@ tick()
 
 let steps=  1/100
 
-pane.addInput(material,'metalness',{min:0,max:1,steps:steps})
-pane.addInput(material,'roughness',{min:0,max:1,steps:steps})
-pane.addInput(material,'aoMapIntensity',{min:0,max:10,steps:steps,label:'Ambient Light Occlusion'})
-
-pane.addInput(
-material,
-'displacementScale',
-{min:0,max:1,steps:steps/10,label:'Displacement Scale'}
-)
-
-pane.addInput(material,'wireframe')
 const handleColor =   pane.addInput(param,'color',{view:'color'})
 
-handleColor.on('change',(e)=>{
-material.color.set(e.value)
-})
 
 const handleSpin=  pane.addButton({
   label:'Animate',title:'Spin'
