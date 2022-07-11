@@ -12,14 +12,14 @@ const canvas = document.querySelector('#canvas')
 
 const textureLoader = new THREE.TextureLoader()
 
-const matCap01 = textureLoader.load('/textures/matcaps/8.png') 
+const matCap01 = textureLoader.load('textures/matcaps/8.png') 
 
 
 
 const scene = new THREE.Scene()
 const fontLoader =  new FontLoader()
 fontLoader.load(
-  '/fonts/helvetiker_regular.typeface.json',
+  'fonts/helvetiker_regular.typeface.json',
   (font)=>{
     const textGeometry = new TextGeometry(
       'Hello Three.JS',
